@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Finanzleser – Newsletter Studio</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #f7f8fa;
+      color: #1a1a1a;
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      background: #ffffff;
+      border-bottom: 3px solid #45A117;
+      padding: 14px 32px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .header-divider {
+      width: 1px;
+      height: 28px;
+      background: #ddd;
+    }
+    .header-subtitle {
+      font-size: 13px;
+      color: #888;
+      letter-spacing: 0.02em;
+    }
+
+    /* ── LAYOUT ── */
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 28px 20px 60px;
+    }
+
+    /* ── CARD ── */
+    .card {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin-bottom: 18px;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.07);
+    }
+    .card-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-title-icon {
+      width: 22px;
+      height: 22px;
+      background: #45A117;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    /* ── API KEY ── */
+    .api-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .api-row input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 13px;
+      outline: none;
+      color: #333;
+      transition: border-color 0.2s;
+      background: #fafafa;
+    }
+    .api-row input:focus { border-color: #45A117; background: #fff; }
+    .api-note {
+      font-size: 12px;
+      color: #aaa;
+      margin-top: 8px;
+    }
+    .api-status {
+      display: none;
+      font-size: 13px;
+      color: #45A117;
+      font-weight: 600;
+      margin-top: 8px;
+    }
+
+    /* ── FORM LABELS ── */
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      color: #555;
+      margin-bottom: 10px;
+    }
+    .form-group { margin-bottom: 20px; }
+
+    /* ── TOPIC GRID ── */
+    .topic-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(185px, 1fr));
+      gap: 8px;
+    }
+    .topic-option { position: relative; }
+    .topic-option input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+      width: 0; height: 0;
+    }
+    .topic-option label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 11px 14px;
+      border: 2px solid #e8e8e8;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13.5px;
+      text-align: center;
+      background: #fafafa;
+      color: #444;
+      transition: all 0.15s;
+      line-height: 1.3;
+      min-height: 44px;
+    }
+    .topic-option input[type="radio"]:checked + label {
+      border-color: #45A117;
+      background: #edf7e6;
+      color: #2b6e0c;
+      font-weight: 700;
+    }
+    .topic-option label:hover { border-color: #45A117; background: #f5fbf0; }
+
+    /* ── MODE TABS ── */
+    .mode-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .mode-tab {
+      flex: 1;
+      padding: 11px 14px;
+      border: 2px solid #e8e8e8;
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: center;
+      font-size: 13.5px;
+      font-family: Arial, sans-serif;
+      background: #fafafa;
+      color: #555;
+      transition: all 0.15s;
+    }
+    .mode-tab.active {
+      border-color: #45A117;
+      background: #edf7e6;
+      color: #2b6e0c;
+      font-weight: 700;
+    }
+    .mode-tab:hover:not(.active) { border-color: #bbb; background: #f4f4f4; }
+
+    /* ── INPUTS / TEXTAREAS ── */
+    textarea, input[type="url"] {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      outline: none;
+      resize: vertical;
+      background: #fafafa;
+      color: #1a1a1a;
+      transition: border-color 0.2s;
+    }
+    textarea:focus, input[type="url"]:focus { border-color: #45A117; background: #fff; }
+    .char-count {
+      font-size: 11px;
+      color: #bbb;
+      text-align: right;
+      margin-top: 4px;
+    }
+    .char-count.warn { color: #cc7700; }
+    .char-count.over  { color: #cc2200; }
+    .url-note { font-size: 12px; color: #aaa; margin-top: 6px; }
+
+    /* ── BUTTONS ── */
+    .btn-primary {
+      width: 100%;
+      padding: 15px;
+      background: #45A117;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      font-family: Arial, sans-serif;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      letter-spacing: 0.01em;
+    }
+    .btn-primary:hover:not(:disabled) { background: #3a8c13; }
+    .btn-primary:active:not(:disabled) { transform: scale(0.99); }
+    .btn-primary:disabled { background: #b0c9a0; cursor: not-allowed; }
+
+    .btn-save {
+      padding: 10px 18px;
+      background: #45A117;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      font-family: Arial, sans-serif;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s;
+    }
+    .btn-save:hover { background: #3a8c13; }
+
+    .btn-copy {
+      padding: 6px 14px;
+      background: #f0f0f0;
+      color: #444;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 12px;
+      font-family: Arial, sans-serif;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .btn-copy:hover { background: #45A117; color: #fff; border-color: #45A117; }
+    .btn-copy.copied { background: #45A117; color: #fff; border-color: #45A117; }
+
+    /* ── LOADING ── */
+    .loading-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 20px 28px;
+    }
+    .spinner {
+      width: 22px; height: 22px;
+      border: 3px solid #ddd;
+      border-top-color: #45A117;
+      border-radius: 50%;
+      animation: spin 0.75s linear infinite;
+      flex-shrink: 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-size: 14px; color: #45A117; font-weight: 600; }
+
+    /* ── ERROR ── */
+    .error-box {
+      background: #fff5f5;
+      border: 1.5px solid #fcc;
+      border-radius: 8px;
+      padding: 14px 16px;
+      color: #c00;
+      font-size: 13.5px;
+      line-height: 1.5;
+    }
+
+    /* ── RESULT FIELDS ── */
+    .result-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 7px;
+      gap: 8px;
+    }
+    .result-label { font-size: 13px; font-weight: 700; color: #555; }
+    .result-meta  { font-size: 11px; color: #bbb; }
+    .result-field {
+      background: #f7f8fa;
+      border: 1.5px solid #e5e5e5;
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 14px;
+      color: #1a1a1a;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+    .result-divider { border: none; border-top: 1px solid #f0f0f0; margin: 18px 0; }
+
+    /* ── CODE AREA ── */
+    .code-area {
+      width: 100%;
+      height: 200px;
+      padding: 14px;
+      background: #1e1e2e;
+      color: #a6e3a1;
+      border: none;
+      border-radius: 8px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 12px;
+      line-height: 1.5;
+      resize: vertical;
+      outline: none;
+    }
+
+    /* ── PREVIEW FRAME ── */
+    .preview-frame {
+      width: 100%;
+      height: 620px;
+      border: 1.5px solid #e5e5e5;
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    /* ── UTILITY ── */
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+<!-- ══ HEADER ══ -->
+<header class="header">
+  <!-- Finanzleser Logo als inline SVG -->
+  <svg height="36" viewBox="0 0 310 56" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Finanzleser">
+    <!-- Logo-Zeichen: zwei Chevrons (">>" gespiegelt zu "<<") -->
+    <polyline points="36,4 14,28 36,52" stroke="#45A117" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <polyline points="54,4 32,28 54,52" stroke="#45A117" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Markenname -->
+    <text x="68" y="41" font-family="'Arial Black', Arial, sans-serif" font-size="33" font-weight="900" fill="#45A117" letter-spacing="-0.5">finanzleser</text>
+  </svg>
+  <div class="header-divider"></div>
+  <span class="header-subtitle">Newsletter Studio &middot; intern</span>
+</header>
+
+<!-- ══ MAIN ══ -->
+<main class="container">
+
+  <!-- API-KEY -->
+  <div class="card" id="apiKeyCard">
+    <div class="card-title">
+      <span style="font-size:16px;">🔑</span>
+      Anthropic API-Key
+    </div>
+    <div class="api-row">
+      <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-…" autocomplete="off" spellcheck="false" />
+      <button class="btn-save" onclick="saveApiKey()">Speichern</button>
+    </div>
+    <div class="api-status" id="apiStatus">✓ API-Key ist gespeichert</div>
+    <p class="api-note">Der Key wird nur lokal in deinem Browser gespeichert – er verlässt niemals dieses Gerät.</p>
+  </div>
+
+  <!-- GENERATOR -->
+  <div class="card">
+    <div class="card-title">
+      <span style="font-size:16px;">✉️</span>
+      Newsletter erstellen
+    </div>
+
+    <!-- 1. Thema -->
+    <div class="form-group">
+      <label class="form-label">1 &nbsp;·&nbsp; Thema wählen</label>
+      <div class="topic-grid">
+        <div class="topic-option"><input type="radio" name="topic" id="t1" value="ETF & Geldanlage" checked><label for="t1">ETF &amp; Geldanlage</label></div>
+        <div class="topic-option"><input type="radio" name="topic" id="t2" value="Steuern"><label for="t2">Steuern</label></div>
+        <div class="topic-option"><input type="radio" name="topic" id="t3" value="Recht"><label for="t3">Recht</label></div>
+        <div class="topic-option"><input type="radio" name="topic" id="t4" value="Fahrradversicherung"><label for="t4">Fahrradversicherung</label></div>
+        <div class="topic-option"><input type="radio" name="topic" id="t5" value="Tierversicherungen"><label for="t5">Tierversicherungen</label></div>
+        <div class="topic-option"><input type="radio" name="topic" id="t6" value="Sozialversicherung"><label for="t6">Sozialversicherung</label></div>
+        <div class="topic-option"><input type="radio" name="topic" id="t7" value="Altersvorsorge"><label for="t7">Altersvorsorge</label></div>
+        <div class="topic-option"><input type="radio" name="topic" id="t8" value="Krankenversicherung"><label for="t8">Krankenversicherung</label></div>
+      </div>
+    </div>
+
+    <!-- 2. Modus -->
+    <div class="form-group">
+      <label class="form-label">2 &nbsp;·&nbsp; Modus wählen</label>
+      <div class="mode-tabs">
+        <button class="mode-tab active" id="tabText" onclick="setMode('text')">✏️&nbsp; Thema beschreiben</button>
+        <button class="mode-tab" id="tabUrl"  onclick="setMode('url')">🔗&nbsp; Artikel-URL eingeben</button>
+      </div>
+
+      <div id="inputText">
+        <textarea id="topicText" rows="4"
+          placeholder="Z. B.: ETF-Sparplan für Anfänger – Vorteile, wie man startet, typische Fehler vermeiden …"
+          oninput="updateCount('topicText','countText',500)"></textarea>
+        <div class="char-count" id="countText">0 / 500</div>
+      </div>
+
+      <div id="inputUrl" class="hidden">
+        <input type="url" id="articleUrl" placeholder="https://www.finanzleser.de/artikel/…" />
+        <p class="url-note">Die KI liest den Artikel und baut den Newsletter darauf auf.</p>
+      </div>
+    </div>
+
+    <!-- 3. Zusatz -->
+    <div class="form-group" style="margin-bottom:24px;">
+      <label class="form-label">3 &nbsp;·&nbsp; Zusatzhinweise <span style="font-weight:400;color:#bbb;">(optional)</span></label>
+      <textarea id="notes" rows="2"
+        placeholder="Z. B.: Saisonaler Bezug, spezielle Zielgruppe, besonderer Ton …"
+        oninput="updateCount('notes','countNotes',300)"></textarea>
+      <div class="char-count" id="countNotes">0 / 300</div>
+    </div>
+
+    <button class="btn-primary" id="generateBtn" onclick="generate()">
+      ✨ &nbsp;Newsletter generieren
+    </button>
+  </div>
+
+  <!-- LOADING -->
+  <div class="card hidden" id="loadingCard">
+    <div class="loading-card">
+      <div class="spinner"></div>
+      <span class="loading-text">Claude schreibt deinen Newsletter …</span>
+    </div>
+  </div>
+
+  <!-- ERROR -->
+  <div class="card hidden" id="errorCard">
+    <div class="error-box" id="errorText"></div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="resultsSection" class="hidden">
+
+    <!-- Betreff & Preheader -->
+    <div class="card">
+      <div class="card-title">
+        <span style="font-size:16px;">📧</span>
+        Betreff &amp; Preheader
+      </div>
+
+      <div class="result-row">
+        <span class="result-label">Betreffzeile</span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="result-meta" id="subjectMeta"></span>
+          <button class="btn-copy" onclick="copyEl('subjectField',this)">Kopieren</button>
+        </div>
+      </div>
+      <div class="result-field" id="subjectField"></div>
+
+      <hr class="result-divider" />
+
+      <div class="result-row">
+        <span class="result-label">Preheader</span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="result-meta" id="preheaderMeta"></span>
+          <button class="btn-copy" onclick="copyEl('preheaderField',this)">Kopieren</button>
+        </div>
+      </div>
+      <div class="result-field" id="preheaderField"></div>
+    </div>
+
+    <!-- HTML-Code -->
+    <div class="card">
+      <div class="card-title" style="justify-content:space-between;">
+        <span style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:16px;">📋</span>
+          HTML-Code
+        </span>
+        <button class="btn-copy" onclick="copyEl('htmlCode',this)">Alles kopieren</button>
+      </div>
+      <textarea class="code-area" id="htmlCode" readonly spellcheck="false"></textarea>
+    </div>
+
+    <!-- Vorschau -->
+    <div class="card">
+      <div class="card-title">
+        <span style="font-size:16px;">👁️</span>
+        Vorschau
+      </div>
+      <iframe class="preview-frame" id="previewFrame" sandbox="allow-same-origin" title="Newsletter-Vorschau"></iframe>
+    </div>
+
+  </div><!-- /resultsSection -->
+
+</main>
+
+<script>
+// ── API KEY ────────────────────────────────────────────────────────────────
+(function () {
+  var saved = localStorage.getItem('fl_api_key');
+  if (saved) {
+    document.getElementById('apiKeyInput').value = saved;
+    document.getElementById('apiStatus').style.display = 'block';
+  }
+})();
+
+function saveApiKey() {
+  var key = document.getElementById('apiKeyInput').value.trim();
+  if (!key) { alert('Bitte einen API-Key eingeben.'); return; }
+  localStorage.setItem('fl_api_key', key);
+  document.getElementById('apiStatus').style.display = 'block';
+}
+
+// ── MODE ───────────────────────────────────────────────────────────────────
+var currentMode = 'text';
+
+function setMode(mode) {
+  currentMode = mode;
+  document.getElementById('tabText').className = 'mode-tab' + (mode === 'text' ? ' active' : '');
+  document.getElementById('tabUrl').className  = 'mode-tab' + (mode === 'url'  ? ' active' : '');
+  document.getElementById('inputText').className = mode === 'text' ? '' : 'hidden';
+  document.getElementById('inputUrl').className  = mode === 'url'  ? '' : 'hidden';
+}
+
+// ── CHAR COUNTER ───────────────────────────────────────────────────────────
+function updateCount(inputId, counterId, max) {
+  var len = document.getElementById(inputId).value.length;
+  var el  = document.getElementById(counterId);
+  el.textContent = len + ' / ' + max;
+  el.className = 'char-count' + (len > max ? ' over' : len > max * 0.85 ? ' warn' : '');
+}
+
+// ── COPY ───────────────────────────────────────────────────────────────────
+function copyEl(elId, btn) {
+  var el   = document.getElementById(elId);
+  var text = el.tagName === 'TEXTAREA' ? el.value : el.textContent;
+  navigator.clipboard.writeText(text).then(function () {
+    var orig = btn.textContent;
+    btn.textContent = '✓ Kopiert!';
+    btn.classList.add('copied');
+    setTimeout(function () { btn.textContent = orig; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+// ── UI STATE ───────────────────────────────────────────────────────────────
+function setLoading(on) {
+  document.getElementById('generateBtn').disabled = on;
+  document.getElementById('loadingCard').className = on ? 'card' : 'card hidden';
+}
+
+function showError(msg) {
+  document.getElementById('errorText').textContent = 'Fehler: ' + msg;
+  document.getElementById('errorCard').className = 'card';
+}
+
+function hideError() {
+  document.getElementById('errorCard').className = 'card hidden';
+}
+
+// ── SYSTEM PROMPT ──────────────────────────────────────────────────────────
+function systemPrompt() {
+  return 'Du bist der Newsletter-Redakteur von Finanzleser (finanzleser.de), einem deutschen digitalen Finanzmagazin der finconext GmbH.\n\n' +
+    'Stil: sachlich, kompetent, verständlich. Leser ansprechen mit "Sie". Ton: seriös, vertrauenswürdig, zugänglich.\n\n' +
+    'Antworte IMMER in exakt diesem Format – kein Text davor oder danach, keine Markdown-Umrahmung:\n\n' +
+    'BETREFF: [Betreffzeile, 50–60 Zeichen]\n' +
+    'PREHEADER: [Preheader, max. 90 Zeichen]\n' +
+    'HTML:\n' +
+    '[vollständiger HTML-Newsletter-Code]\n\n' +
+    'Newsletter-Aufbau:\n' +
+    '1. Begrüßung ("Liebe Leserin, lieber Leser,")\n' +
+    '2. Hauptartikel (300–400 Wörter, mit h2-Zwischenüberschriften)\n' +
+    '3. 3 Lesetipps als Bullet-Liste\n' +
+    '4. Call-to-Action-Button\n' +
+    '5. Abschluss mit Grußformel und "Ihr Finanzleser-Team"\n\n' +
+    'HTML-Vorgaben (alle Styles inline, kompatibel mit CleverReach & Outlook):\n' +
+    '- Äußerer Wrapper: max-width:600px; margin:0 auto; background:#f7f8fa; font-family:Arial,sans-serif;\n' +
+    '- Header-Block: background:#45A117; padding:24px 32px; Schriftzug "Finanzleser" in Weiß, Georgia,serif, 28px\n' +
+    '- Content-Block: background:#ffffff; padding:32px;\n' +
+    '- h2: color:#45A117; font-family:Georgia,serif; margin:24px 0 8px;\n' +
+    '- Fließtext: color:#1a1a1a; font-size:15px; line-height:1.7;\n' +
+    '- Bullet-Liste: padding-left:20px; color:#1a1a1a;\n' +
+    '- CTA-Button: display:inline-block; background:#D3005E; color:#ffffff; padding:14px 28px; border-radius:6px; text-decoration:none; font-weight:bold; font-size:15px; margin:24px 0;\n' +
+    '- Footer: background:#f0f0f0; padding:16px 32px; font-size:12px; color:#888;\n' +
+    '- Keine externen CSS-Dateien, keine Google Fonts, alles inline.';
+}
+
+// ── GENERATE ───────────────────────────────────────────────────────────────
+async function generate() {
+  var apiKey = localStorage.getItem('fl_api_key');
+  if (!apiKey) { alert('Bitte zuerst den API-Key eingeben und speichern.'); return; }
+
+  var topic = document.querySelector('input[name="topic"]:checked').value;
+  var notes = document.getElementById('notes').value.trim();
+  var userMsg = '';
+
+  if (currentMode === 'text') {
+    var txt = document.getElementById('topicText').value.trim();
+    if (!txt) { alert('Bitte das Thema beschreiben.'); return; }
+    userMsg = 'Thema-Bereich: ' + topic + '\n\nInhalt / Fokus: ' + txt;
+  } else {
+    var url = document.getElementById('articleUrl').value.trim();
+    if (!url) { alert('Bitte eine Artikel-URL eingeben.'); return; }
+    userMsg = 'Thema-Bereich: ' + topic + '\n\nArtikel-URL: ' + url +
+      '\n\nBitte lese den verlinkten Artikel und erstelle den Newsletter auf Basis dieser Inhalte.';
+  }
+  if (notes) userMsg += '\n\nZusatzhinweise: ' + notes;
+
+  setLoading(true);
+  hideError();
+  document.getElementById('resultsSection').className = 'hidden';
+
+  try {
+    var resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 4096,
+        system: systemPrompt(),
+        messages: [{ role: 'user', content: userMsg }]
+      })
+    });
+
+    if (!resp.ok) {
+      var errData = await resp.json().catch(function() { return {}; });
+      throw new Error((errData.error && errData.error.message) || ('HTTP ' + resp.status));
+    }
+
+    var data = await resp.json();
+    var raw  = data.content[0].text;
+    parseAndShow(raw);
+
+  } catch (e) {
+    showError(e.message);
+  }
+
+  setLoading(false);
+}
+
+// ── PARSE & DISPLAY ────────────────────────────────────────────────────────
+function parseAndShow(raw) {
+  var subjectMatch   = raw.match(/^BETREFF:\s*(.+)$/m);
+  var preheaderMatch = raw.match(/^PREHEADER:\s*(.+)$/m);
+  var htmlMatch      = raw.match(/^HTML:\s*\n([\s\S]+)$/m);
+
+  var subject   = subjectMatch   ? subjectMatch[1].trim()   : '(nicht gefunden)';
+  var preheader = preheaderMatch ? preheaderMatch[1].trim() : '(nicht gefunden)';
+  var html      = htmlMatch      ? htmlMatch[1].trim()      : raw;
+
+  document.getElementById('subjectField').textContent   = subject;
+  document.getElementById('preheaderField').textContent = preheader;
+  document.getElementById('htmlCode').value             = html;
+
+  document.getElementById('subjectMeta').textContent   = subject.length   + ' Zeichen';
+  document.getElementById('preheaderMeta').textContent = preheader.length + ' Zeichen';
+
+  document.getElementById('previewFrame').srcdoc = html;
+
+  document.getElementById('resultsSection').className = '';
+  document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+</script>
+
+</body>
+</html>
