@@ -52,6 +52,14 @@ Nicole Hahn – Windows-Nutzer, Desktop-App von Claude Code.
 
 ## Wichtige Hinweise für zukünftige Sessions
 - Die Nutzerin ist **auf Windows**, der Entwicklungsserver läuft auf Linux → kein direkter Dateizugriff auf lokale Windows-Dateien
-- Änderungen müssen auf **allen aktiven Branches** gepusht werden: `main`, `claude/fix-code-response-31ZTB`, `claude/financial-newsletter-studio-oFYU5`
 - GitHub Pages deployt von `main`
-- Nie nur auf einen Branch pushen und davon ausgehen dass es sichtbar ist
+
+### PFLICHT nach jeder Änderung: Alle 3 Branches pushen
+```bash
+git add -A && git commit -m "..."
+git push origin main
+git checkout claude/financial-newsletter-studio-oFYU5 && git merge main && git push origin claude/financial-newsletter-studio-oFYU5
+git checkout claude/fix-code-response-31ZTB && git merge main && git push origin claude/fix-code-response-31ZTB
+git checkout main
+```
+Nie nur auf einen Branch pushen!
